@@ -13,11 +13,11 @@ class Server extends Actor {
     	  context.watch(sender)
         }
       case Broadcast(msg) => {
-    	  val username = clients.filter(sender == _._2).head._1
+    	  val username = getUsername(sender)
           broadcast(NewMsg(username, msg))
       }
       case Terminated(client) => {
-        val username = clients.filter(client == _._2).head._1
+        val username = getUsername(client)
         clients = clients.filter(sender != _._2)
         broadcast(Info(f"$username%s left the chat"))
       }
@@ -25,6 +25,10 @@ class Server extends Actor {
     
     def broadcast(msg: Msg) {
     	clients.foreach(x => x._2 ! msg)
+    }
+
+    def getUsername(actor: ActorRef): String = {
+	clients.filter(actor == _._2).head._1
     }
  }
 
